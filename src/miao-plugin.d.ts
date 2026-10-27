@@ -1,7 +1,7 @@
-declare module 'file://D:\\IDEAProject\\miao-xbot-plugin\\xopenbot.js' {
+declare module '*/xopenbot.js' {
   import type { IPlugin } from '@xopenbot/plugin';
 
-  const miaoPlugin: IPlugin;
-  export default miaoPlugin;
-  export { miaoPlugin as plugin };
+  const Plugin: IPlugin;
+  export default Plugin;
+  export { Plugin as plugin };
 }

@@ -1,18 +1,20 @@
 import { SnowLumaWebSocketClient } from '@snowluma/sdk';
 import type { AnyMessageSegment } from '@snowluma/sdk';
 import { Workspace } from '@xopenbot/plugin';
-import MiaoPlugin from 'file://D:\\IDEAProject\\miao-xbot-plugin\\xopenbot.js';
-import { buildMessageSegments } from './src/host';
-import type { HostPart } from './src/host';
+import MiaoPlugin from './plugins/miao-xbot-plugin/xopenbot.js';
+import YunzaiPlugin from './plugins/yunzai-xbot-plugin/xopenbot.js';
+import { buildMessageSegments } from './src/host.js';
+import type { HostPart } from './src/host.js';
 
 const selfId = 3629157064;
 
 const bot = new SnowLumaWebSocketClient({
-  url: 'ws://192.168.43.7:3001',
-  accessToken: 'LeXLgYcXtFoebcJHEd_qg5Jik2xBS1b4KZqqmEWe8DQ',
+  url: 'ws://127.0.0.1:3001',
+  accessToken: 'vAonhNthREIkgo6TXD5fGMJa71xvd9RiDmV-DCsF8Ac',
   reconnect: true
 });
 
+Workspace.registry(YunzaiPlugin);
 Workspace.registry(MiaoPlugin);
 
 bot.onGroupMessage(event => {

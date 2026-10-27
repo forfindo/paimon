@@ -1,5 +1,5 @@
 {
-  "name": "@openbot/bot",
+  "name": "paimon",
   "private": true,
   "version": "1.0.0",
   "description": "",
@@ -13,6 +13,10 @@
   "license": "ISC",
   "packageManager": "pnpm@10.30.3",
   "dependencies": {
-    "@snowluma/sdk": "2.1.1"
+    "@snowluma/sdk": "2.2.1",
+    "@xopenbot/plugin": "file:D:/IDEAProject/qq-bot/packages/plugin/xopenbot-plugin-0.0.2.tgz"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5"
   }
 }
