@@ -1,6 +1,3 @@
 [submodule "plugins/yunzai-xbot-plugin"]
 	path = plugins/yunzai-xbot-plugin
 	url = https://github.com/forfindo/yunzai-xbot-plugin.git
-[submodule "plugins/miao-xbot-plugin"]
-	path = plugins/miao-xbot-plugin
-	url = https://github.com/forfindo/miao-xbot-plugin.git

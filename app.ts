@@ -1,7 +1,6 @@
 import { SnowLumaWebSocketClient } from '@snowluma/sdk';
 import type { AnyMessageSegment } from '@snowluma/sdk';
 import { Workspace } from '@xopenbot/plugin';
-import MiaoPlugin from './plugins/miao-xbot-plugin/xopenbot.js';
 import YunzaiPlugin from './plugins/yunzai-xbot-plugin/xopenbot.js';
 import { buildMessageSegments } from './src/host.js';
 import type { HostPart } from './src/host.js';
@@ -14,13 +13,14 @@ const bot = new SnowLumaWebSocketClient({
   reconnect: true
 });
 
-Workspace.registry(YunzaiPlugin);
-Workspace.registry(MiaoPlugin);
+const plugins = new Workspace();
+
+plugins.registry(YunzaiPlugin);
 
 bot.onGroupMessage(event => {
   const sender = event.sender ?? { user_id: event.user_id };
   const userId = sender.user_id ?? event.user_id;
-  Workspace.process(event.raw_message, {
+  plugins.process(event.raw_message, {
     selfId: String(selfId),
     groupId: String(event.group_id),
     isMaster: userId === 3530766280,
@@ -72,7 +72,7 @@ bot.onGroupMessage(event => {
 bot.onPrivateMessage(event => {
   const sender = event.sender ?? { user_id: event.user_id };
   const userId = sender.user_id ?? event.user_id;
-  Workspace.process(event.raw_message, {
+  plugins.process(event.raw_message, {
     selfId: String(selfId),
     userId: String(userId),
     isMaster: userId === 3530766280,

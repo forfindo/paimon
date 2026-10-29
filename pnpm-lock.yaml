@@ -117,6 +117,34 @@ importers:
         specifier: ^3.9.6
         version: 3.9.10
 
+  plugins/yunzai-xbot-plugin/plugins/miao-plugin:
+    dependencies:
+      cheerio:
+        specifier: ^1.0.0
+        version: 1.2.0
+      https-proxy-agent:
+        specifier: ^9.1.0
+        version: 9.1.0
+      image-size:
+        specifier: ^1.1.1
+        version: 1.2.1
+      lodash:
+        specifier: ^4.18.1
+        version: 4.18.1
+      md5:
+        specifier: ^2.3.0
+        version: 2.3.0
+      moment:
+        specifier: ^2.31.0
+        version: 2.31.0
+      node-fetch:
+        specifier: ^3.3.2
+        version: 3.3.2
+    devDependencies:
+      request:
+        specifier: ^2.88.2
+        version: 2.88.2
+
 packages:
 
   '@inquirer/ansi@2.0.10':
@@ -332,7 +360,7 @@ packages:
     resolution: {integrity: sha512-T8L6i7wCuyoK8A/ZeLYt1+q0ty3Zb9+qbSSvrIVitzT3YjZqkTZ40IbRsPanlB4h1QB3JVL1SYCdR6ngtFYcuA==}
 
   '@xopenbot/plugin@file:../qq-bot/packages/plugin/xopenbot-plugin-0.0.2.tgz':
-    resolution: {integrity: sha512-q3AqnlJLPnFCxqatqx/Jw7+0HiZLySeJ+M49vzQ9N9UMwhsvYyXHQ++6wnS4g5krarDtmQQBvZkMKgqdjkKALQ==, tarball: file:../qq-bot/packages/plugin/xopenbot-plugin-0.0.2.tgz}
+    resolution: {integrity: sha512-9HhQDlSlWqSGgFbTNaoB6/MPFZCES0pRgWKRdrTPshEBwHoxsscZimgleHf99XRqPW7EnLvIxmas9yJriUH33g==, tarball: file:../qq-bot/packages/plugin/xopenbot-plugin-0.0.2.tgz}
     version: 0.0.2
 
   abbrev@4.0.0:
@@ -1791,7 +1819,9 @@ snapshots:
 
   '@types/validator@13.15.10': {}
 
-  '@xopenbot/plugin@file:../qq-bot/packages/plugin/xopenbot-plugin-0.0.2.tgz': {}
+  '@xopenbot/plugin@file:../qq-bot/packages/plugin/xopenbot-plugin-0.0.2.tgz':
+    dependencies:
+      node-schedule: 2.1.2
 
   abbrev@4.0.0:
     optional: true
