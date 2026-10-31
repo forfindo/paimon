@@ -19,34 +19,6 @@ importers:
         specifier: ^26.6.5
         version: 26.6.5
 
-  plugins/miao-xbot-plugin:
-    dependencies:
-      cheerio:
-        specifier: ^1.0.0
-        version: 1.2.0
-      https-proxy-agent:
-        specifier: ^9.1.0
-        version: 9.1.0
-      image-size:
-        specifier: ^1.1.1
-        version: 1.2.1
-      lodash:
-        specifier: ^4.18.1
-        version: 4.18.1
-      md5:
-        specifier: ^2.3.0
-        version: 2.3.0
-      moment:
-        specifier: ^2.31.0
-        version: 2.31.0
-      node-fetch:
-        specifier: ^3.3.2
-        version: 3.3.2
-    devDependencies:
-      request:
-        specifier: ^2.88.2
-        version: 2.88.2
-
   plugins/yunzai-xbot-plugin:
     dependencies:
       art-template:
@@ -122,24 +94,9 @@ importers:
       cheerio:
         specifier: ^1.0.0
         version: 1.2.0
-      https-proxy-agent:
-        specifier: ^9.1.0
-        version: 9.1.0
       image-size:
         specifier: ^1.1.1
         version: 1.2.1
-      lodash:
-        specifier: ^4.18.1
-        version: 4.18.1
-      md5:
-        specifier: ^2.3.0
-        version: 2.3.0
-      moment:
-        specifier: ^2.31.0
-        version: 2.31.0
-      node-fetch:
-        specifier: ^3.3.2
-        version: 3.3.2
     devDependencies:
       request:
         specifier: ^2.88.2
@@ -360,7 +317,7 @@ packages:
     resolution: {integrity: sha512-T8L6i7wCuyoK8A/ZeLYt1+q0ty3Zb9+qbSSvrIVitzT3YjZqkTZ40IbRsPanlB4h1QB3JVL1SYCdR6ngtFYcuA==}
 
   '@xopenbot/plugin@file:../qq-bot/packages/plugin/xopenbot-plugin-0.0.2.tgz':
-    resolution: {integrity: sha512-9HhQDlSlWqSGgFbTNaoB6/MPFZCES0pRgWKRdrTPshEBwHoxsscZimgleHf99XRqPW7EnLvIxmas9yJriUH33g==, tarball: file:../qq-bot/packages/plugin/xopenbot-plugin-0.0.2.tgz}
+    resolution: {integrity: sha512-E3P+VCd3qLibJN4ayCSpF3qr2BZir7dTLdbiM+BqBBKS4owOo3gW9niGLv3WDeBgn4dtUzEkJcuL39lopmGaOg==, tarball: file:../qq-bot/packages/plugin/xopenbot-plugin-0.0.2.tgz}
     version: 0.0.2
 
   abbrev@4.0.0:
@@ -379,10 +336,6 @@ packages:
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
-
-  agent-base@9.0.0:
-    resolution: {integrity: sha512-TQf59BsZnytt8GdJKLPfUZ54g/iaUL2OWDSFCCvMOhsHduDQxO8xC4PNeyIkVcA5KwL2phPSv0douC0fgWzmnA==}
-    engines: {node: '>= 20'}
 
   ajv@6.15.0:
     resolution: {integrity: sha512-fgFx7Hfoq60ytK2c7DhnF8jIvzYgOMxfugjLOSMHjLIPgenqa7S7oaagATUq99mV6IYvN2tRmC0wnTYX6iPbMw==}
@@ -914,10 +867,6 @@ packages:
     resolution: {integrity: sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==}
     engines: {node: '>= 14'}
 
-  https-proxy-agent@9.1.0:
-    resolution: {integrity: sha512-ag87y7cJJ9/3+GxFr8Oy4O5faDsGRGnBGsJj/YjOSsSx/5eadKLYTMPlzuR6obgoCDDm0abAAZitXXQkMOPSpA==}
-    engines: {node: '>= 20'}
-
   iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
     engines: {node: '>=0.10.0'}
@@ -1236,15 +1185,6 @@ packages:
   proc-log@6.1.0:
     resolution: {integrity: sha512-iG+GYldRf2BQ0UDUAd6JQ/RwzaQy6mXmsk/IzlYyal4A4SNFw54MeH4/tLkF4I5WoWG9SQwuqWzS99jaFQHBuQ==}
     engines: {node: ^20.17.0 || >=22.9.0}
-
-  proxy-agent-negotiate@1.1.0:
-    resolution: {integrity: sha512-N8IBcM3UgCVzz2L2Lqv8DVntDnnC8/hiV4nEDUPkqq72TPUgYWjQc+bdZlBPZK9LzPAvOY//gAt0S0DApoOXWQ==}
-    engines: {node: '>= 20'}
-    peerDependencies:
-      kerberos: ^2.0.0
-    peerDependenciesMeta:
-      kerberos:
-        optional: true
 
   proxy-from-env@2.1.0:
     resolution: {integrity: sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==}
@@ -1836,8 +1776,6 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  agent-base@9.0.0: {}
-
   ajv@6.15.0:
     dependencies:
       fast-deep-equal: 3.1.3
@@ -2354,15 +2292,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  https-proxy-agent@9.1.0:
-    dependencies:
-      agent-base: 9.0.0
-      debug: 4.4.3
-      proxy-agent-negotiate: 1.1.0
-    transitivePeerDependencies:
-      - kerberos
-      - supports-color
-
   iconv-lite@0.4.24:
     dependencies:
       safer-buffer: 2.1.2
@@ -2715,8 +2644,6 @@ snapshots:
 
   proc-log@6.1.0:
     optional: true
-
-  proxy-agent-negotiate@1.1.0: {}
 
   proxy-from-env@2.1.0: {}
 
