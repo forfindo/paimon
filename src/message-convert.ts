@@ -125,6 +125,59 @@ export function convertMessageElem(elem: MessageElem): AnyMessageSegment | null 
   }
 }
 
+/** 将 OutgoingMessage（字符串 / 消息段数组）转成转发预览用纯文本，非文本段用类型占位 */
+export function outgoingToText(content: string | AnyMessageSegment[]): string {
+  if (typeof content === 'string') {
+    return content;
+  }
+  const parts: string[] = [];
+  for (const segment of content) {
+    const data: Record<string, unknown> = segment.data;
+    switch (segment.type) {
+      case 'text':
+        if (typeof data.text === 'string') parts.push(data.text);
+        break;
+      case 'at':
+        parts.push(`@${data.qq}`);
+        break;
+      case 'face':
+        parts.push('[表情]');
+        break;
+      case 'image':
+        parts.push('[图片]');
+        break;
+      case 'record':
+        parts.push('[语音]');
+        break;
+      case 'video':
+        parts.push('[视频]');
+        break;
+      case 'reply':
+        parts.push('[回复]');
+        break;
+      case 'forward':
+        parts.push('[转发]');
+        break;
+      case 'json':
+      case 'xml':
+        parts.push('[卡片]');
+        break;
+      case 'poke':
+        parts.push('[戳一戳]');
+        break;
+      case 'location':
+        parts.push('[位置]');
+        break;
+      case 'share':
+        parts.push('[分享]');
+        break;
+      default:
+        break;
+    }
+  }
+  return parts.join('');
+}
+
 /** 将 Sendable（字符串 / 元素 / 元素数组）转换为 SDK 的 OutgoingMessage */
 export function toOutgoingMessage(content: Sendable): string | AnyMessageSegment[] {
   if (typeof content === 'string') {

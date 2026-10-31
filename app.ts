@@ -1,8 +1,14 @@
-import {type AnyMessageSegment, type ForwardMessageParams, type JsonArray, type JsonObject, SnowLumaWebSocketClient} from '@snowluma/sdk';
+import {
+  type AnyMessageSegment,
+  type ForwardMessageParams,
+  type JsonArray,
+  type JsonObject,
+  SnowLumaWebSocketClient
+} from '@snowluma/sdk';
 import {Workspace} from '@xopenbot/plugin';
 import YunzaiPlugin from './plugins/yunzai-xbot-plugin/xopenbot.js';
 import type {Forwardable, Sendable, MessageRet} from "./src/message-part.js";
-import {convertSegment, toOutgoingMessage} from "./src/message-convert.js";
+import {convertSegment, outgoingToText, toOutgoingMessage} from "./src/message-convert.js";
 import * as fs from "node:fs";
 
 const bot = new SnowLumaWebSocketClient({
@@ -23,18 +29,37 @@ process.on("unhandledRejection", (error, promise) => {
   console.log(error)
 })
 
-const makeForwardMsg = async (forwardMsg: Forwardable[]) => {
-  const nodes = forwardMsg.map(node => ({
-    type: 'node' as const,
-    data: {
-      user_id: node.user_id,
-      nickname: node.nickname ?? String(node.user_id),
-      content: toOutgoingMessage(node.message),
-    },
-  }));
-  const res = await bot.uploadForwardMessage({ messages: nodes } as unknown as ForwardMessageParams);
+const makeForwardMsg = async (forwardMsg: Forwardable[], user_id?: number, group_id?: number) => {
+  const nodes = forwardMsg.map(node => {
+    // 部分调用方（如 ImgUpload.profileImgList）只给 message，缺省时用机器人自身身份补全
+    const uid = node.user_id ?? botInfo.user_id;
+    return {
+      type: 'node' as const,
+      data: {
+        user_id: uid,
+        nickname: node.nickname ?? botInfo.nickname ?? String(uid),
+        content: toOutgoingMessage(node.message),
+      },
+    };
+  });
+  // 转发卡片预览：每条消息生成一行「昵称: 文本」，非文本段用类型占位
+  const preview = nodes.flatMap(node => {
+    const text = outgoingToText(node.data.content).trim();
+    return text ? [`${node.data.nickname}: ${text}`] : [];
+  });
+  const res = await bot.uploadForwardMessage({
+    messages: nodes,
+    user_id: user_id,
+    group_id: group_id,
+    ...(preview.length
+        ? {
+          summary: preview.join('\n'),
+          news: preview.map(text => ({text})),
+        }
+        : {}),
+  } as unknown as ForwardMessageParams);
   const id = res.res_id || res.forward_id || String(res.message_id);
-  return { type: 'forward' as const, id };
+  return {type: 'forward' as const, id};
 }
 const recallMsg = (messageId: number) => {
   return bot.deleteMessage(messageId)
@@ -63,20 +88,22 @@ bot.onGroupMessage(async event => {
     async reply(content: Sendable, quote?: boolean): Promise<MessageRet> {
       const message = toOutgoingMessage(content);
       const outgoing = quote
-        ? [
-            { type: 'reply' as const, data: { id: String(event.message_id) } },
+          ? [
+            {type: 'reply' as const, data: {id: String(event.message_id)}},
             ...(typeof message === 'string'
-              ? (message ? [{ type: 'text' as const, data: { text: message } }] : [])
-              : message),
+                ? (message ? [{type: 'text' as const, data: {text: message}}] : [])
+                : message),
           ]
-        : message;
+          : message;
       // sendGroupMessage 返回 SendMessageResult，这里补成插件约定的 MessageRet（SDK 只提供 message_id）
       const res = await bot.sendGroupMessage(event.group_id, outgoing);
       return ({message_id: String(res.message_id), seq: 0, rand: 0, time: 0});
     },
     /** 群对象 */
     group: {
-      makeForwardMsg,
+      makeForwardMsg: (forwardMsg: Forwardable[]) => {
+        return makeForwardMsg(forwardMsg, undefined, event.group_id)
+      },
       pickMember: (uid: number) => {
         return {
           info: gml.get(event.group_id)!.get(uid)
@@ -131,8 +158,8 @@ bot.onGroupMessage(async event => {
     source: oicqSource,
     seq: event.message_seq
   }).catch(error => {
-        console.error('[bot] Workspace.process 处理失败', error);
-      });
+    console.error('[bot] Workspace.process 处理失败', error);
+  });
 });
 
 bot.onPrivateMessage(event => {
@@ -150,9 +177,9 @@ bot.onPrivateMessage(event => {
       const message = toOutgoingMessage(content);
       const outgoing = quote
           ? [
-            { type: 'reply' as const, data: { id: String(event.message_id) } },
+            {type: 'reply' as const, data: {id: String(event.message_id)}},
             ...(typeof message === 'string'
-                ? (message ? [{ type: 'text' as const, data: { text: message } }] : [])
+                ? (message ? [{type: 'text' as const, data: {text: message}}] : [])
                 : message),
           ]
           : message;
@@ -162,7 +189,9 @@ bot.onPrivateMessage(event => {
     },
     /** 好友对象 */
     friend: {
-      makeForwardMsg,
+      makeForwardMsg: (forwardMsg: Forwardable[]) => {
+        return makeForwardMsg(forwardMsg, event.user_id, undefined)
+      },
       recallMsg,
       sendFile: (filePath: string) => {
         return bot.sendPrivateFile(event.user_id, fs.createReadStream(filePath));
@@ -209,8 +238,8 @@ bot.onPrivateMessage(event => {
     /** 引用回复 */
     source: oicqSource
   }).catch(error => {
-        console.error('[bot] Workspace.process 处理失败', error);
-      });
+    console.error('[bot] Workspace.process 处理失败', error);
+  });
 });
 
 await bot.connect();
@@ -229,11 +258,12 @@ const plugins = new Workspace({
   gml: gml,
   nickname: botInfo.nickname,
   logger: (globalThis as unknown as { logger: unknown }).logger,
-  makeForwardMsg: async (msg: { message: string[] }[]) => {
-
+  makeForwardMsg: async (forwardMsg: Forwardable[]) => {
+    return makeForwardMsg(forwardMsg)
   },
   getForwardMsg: async (resid: string) => {
-
+    const {messages} = await bot.getForwardMessage({id: resid});
+    return messages.map(item => convertSegment(item as unknown as AnyMessageSegment))
   },
   pickUser: (uin: number) => {
     return {

@@ -196,7 +196,8 @@ export interface Quotable {
 
 /** 可转发的消息 */
 export interface Forwardable {
-  user_id: number,
+  /** 缺省时回退为机器人自身（见 app.ts makeForwardMsg） */
+  user_id?: number,
   message: Sendable,
   nickname?: string,
   time?: number,
