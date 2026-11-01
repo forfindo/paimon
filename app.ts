@@ -227,6 +227,7 @@ bot.onPrivateMessage(event => {
         })
       }
     },
+    isMaster: event.user_id === 3530766280,
     message_type: "private",
     /** friend:好友 group:群临时会话 self:我的设备 other:其他途径的临时会话 */
     sub_type: "friend",
