@@ -29,6 +29,25 @@ process.on("unhandledRejection", (error, promise) => {
   console.log(error)
 })
 
+/** 判断内容是否已经是发送结果（MessageRet）。合并转发走一步式发送时会直接返回此结构。 */
+const isSentResult = (content: Sendable): boolean => {
+  if (typeof content === 'string' || Array.isArray(content)) {
+    return false;
+  }
+  const obj = content as { message_id?: unknown; type?: unknown };
+  return typeof obj.message_id === 'string' && obj.type === undefined;
+}
+
+const outgoingWithQuote = (content: Sendable, quoteMsg?: number) => {
+  const message = toOutgoingMessage(content);
+  return quoteMsg ? [
+    {type: 'reply' as const, data: {id: String(quoteMsg)}},
+    ...(typeof message === 'string'
+        ? (message ? [{type: 'text' as const, data: {text: message}}] : [])
+        : message),
+  ] : message;
+}
+
 const makeForwardMsg = async (forwardMsg: Forwardable[], user_id?: number, group_id?: number) => {
   const nodes = forwardMsg.map(node => {
     // 部分调用方（如 ImgUpload.profileImgList）只给 message，缺省时用机器人自身身份补全
@@ -47,16 +66,27 @@ const makeForwardMsg = async (forwardMsg: Forwardable[], user_id?: number, group
     const text = outgoingToText(node.data.content).trim();
     return text ? [`${node.data.nickname}: ${text}`] : [];
   });
+  const previewParams = preview.length
+      ? {summary: preview.join('\n'), news: preview.map(text => ({text}))}
+      : {};
+
+  // SnowLuma 的私有转发需要目标 uid，两步式 upload_forward_msg 在私有场景会报
+  // 「private image target uid is missing」，因此有目标时改用一步式 send_forward_msg 直接发送。
+  if (group_id !== undefined || user_id !== undefined) {
+    const res = await bot.sendForwardMessage({
+      message_type: group_id !== undefined ? 'group' : 'private',
+      user_id: user_id,
+      group_id: group_id,
+      messages: nodes,
+      ...previewParams,
+    } as unknown as ForwardMessageParams);
+    return {message_id: String(res.message_id), seq: 0, rand: 0, time: 0};
+  }
+
+  // 无目标时（如 Workspace 的 Bot.makeForwardMsg 兜底）退回两步式上传
   const res = await bot.uploadForwardMessage({
     messages: nodes,
-    user_id: user_id,
-    group_id: group_id,
-    ...(preview.length
-        ? {
-          summary: preview.join('\n'),
-          news: preview.map(text => ({text})),
-        }
-        : {}),
+    ...previewParams,
   } as unknown as ForwardMessageParams);
   const id = res.res_id || res.forward_id || String(res.message_id);
   return {type: 'forward' as const, id};
@@ -86,17 +116,12 @@ bot.onGroupMessage(async event => {
      * @param quote 引用这条消息(默认false)
      */
     async reply(content: Sendable, quote?: boolean): Promise<MessageRet> {
-      const message = toOutgoingMessage(content);
-      const outgoing = quote
-          ? [
-            {type: 'reply' as const, data: {id: String(event.message_id)}},
-            ...(typeof message === 'string'
-                ? (message ? [{type: 'text' as const, data: {text: message}}] : [])
-                : message),
-          ]
-          : message;
+      // 合并转发一步式发送时内容已经是 MessageRet，直接透传，避免被当成普通消息重发
+      if (isSentResult(content)) {
+        return content as unknown as MessageRet;
+      }
       // sendGroupMessage 返回 SendMessageResult，这里补成插件约定的 MessageRet（SDK 只提供 message_id）
-      const res = await bot.sendGroupMessage(event.group_id, outgoing);
+      const res = await bot.sendGroupMessage(event.group_id, outgoingWithQuote(content, quote ? event.message_id : undefined));
       return ({message_id: String(res.message_id), seq: 0, rand: 0, time: 0});
     },
     /** 群对象 */
@@ -174,17 +199,12 @@ bot.onPrivateMessage(event => {
      * @param quote 引用这条消息(默认false)
      */
     async reply(content: Sendable, quote?: boolean): Promise<MessageRet> {
-      const message = toOutgoingMessage(content);
-      const outgoing = quote
-          ? [
-            {type: 'reply' as const, data: {id: String(event.message_id)}},
-            ...(typeof message === 'string'
-                ? (message ? [{type: 'text' as const, data: {text: message}}] : [])
-                : message),
-          ]
-          : message;
+      // 合并转发一步式发送时内容已经是 MessageRet，直接透传，避免被当成普通消息重发
+      if (isSentResult(content)) {
+        return content as unknown as MessageRet;
+      }
       // sendGroupMessage 返回 SendMessageResult，这里补成插件约定的 MessageRet（SDK 只提供 message_id）
-      const res = await bot.sendPrivateMessage(event.user_id, outgoing);
+      const res = await bot.sendPrivateMessage(event.user_id, outgoingWithQuote(content, quote ? event.message_id : undefined));
       return ({message_id: String(res.message_id), seq: 0, rand: 0, time: 0});
     },
     /** 好友对象 */
