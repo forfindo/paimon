@@ -62,12 +62,12 @@ const makeForwardMsg = async (forwardMsg: Forwardable[], user_id?: number, group
     };
   });
   // 转发卡片预览：每条消息生成一行「昵称: 文本」，非文本段用类型占位
-  const preview = nodes.flatMap(node => {
+  const preview = nodes.slice(0, 3).flatMap(node => {
     const text = outgoingToText(node.data.content).trim();
     return text ? [`${node.data.nickname}: ${text}`] : [];
   });
   const previewParams = preview.length
-      ? {summary: preview.join('\n'), news: preview.map(text => ({text}))}
+      ? {summary: `查看${nodes.length}条消息`, news: preview.map(text => ({text}))}
       : {};
 
   // SnowLuma 的私有转发需要目标 uid，两步式 upload_forward_msg 在私有场景会报
@@ -93,6 +93,60 @@ const makeForwardMsg = async (forwardMsg: Forwardable[], user_id?: number, group
 }
 const recallMsg = (messageId: number) => {
   return bot.deleteMessage(messageId)
+}
+/** 取消息段中能唯一标识该类型的字段，按 {type:value} 拼接 */
+const msgToString = (message: AnyMessageSegment[]) => {
+  const pick = (data: Record<string, unknown>, ...keys: string[]) => {
+    for (const key of keys) {
+      const value = data[key];
+      if (typeof value === 'string' && value.length > 0) return value;
+      if (typeof value === 'number') return String(value);
+    }
+    return '';
+  };
+
+  return message.map(msg => {
+    // 各段的 data 结构不同，这里统一按 Record 读取
+    const data = msg.data as Record<string, unknown>;
+    switch (msg.type) {
+      case 'text':
+        return `{text:${pick(data, 'text')}}`;
+      case 'at':
+        return `{at:${pick(data, 'qq', 'uid')}}`;
+      case 'face':
+        return `{face:${pick(data, 'id')}}`;
+      case 'reply':
+        return `{reply:${pick(data, 'id')}}`;
+      case 'image':
+        return `{image:${pick(data, 'file')}}`;
+      case 'record':
+        return `{record:${pick(data, 'file')}}`;
+      case 'video':
+        return `{video:${pick(data, 'file')}}`;
+      case 'json':
+        return `{json:${pick(data, 'data')}}`;
+      case 'xml':
+        return `{xml:${pick(data, 'data')}}`;
+      case 'poke':
+        return `{poke:${pick(data, 'id', 'type')}}`;
+      case 'forward':
+        return `{forward:${pick(data, 'id', 'res_id', 'forward_id')}}`;
+      case 'node':
+        // 节点本身没有 id，用发送者 QQ 标识
+        return `{node:${pick(data, 'user_id')}}`;
+      case 'share':
+        return `{share:${pick(data, 'url')}}`;
+      case 'music':
+        return `{music:${pick(data, 'id', 'url', 'audio')}}`;
+      case 'location':
+        return `{location:${pick(data, 'lat')},${pick(data, 'lon')}}`;
+      case 'contact':
+        return `{contact:${pick(data, 'id')}}`;
+      default:
+        // 未知类型退化为第一个可用的标量字段，保证仍有值可区分
+        return `{${msg.type}:${pick(data, ...Object.keys(data))}}`;
+    }
+  }).join('');
 }
 
 bot.onGroupMessage(async event => {
@@ -181,7 +235,8 @@ bot.onGroupMessage(async event => {
     message_id: event.message_id,
     /** 引用回复 */
     source: oicqSource,
-    seq: event.message_seq
+    seq: event.message_seq,
+    toString: () => msgToString(event.message as unknown as AnyMessageSegment[])
   }).catch(error => {
     console.error('[bot] Workspace.process 处理失败', error);
   });
@@ -257,7 +312,8 @@ bot.onPrivateMessage(event => {
     /** 消息编号，在群消息中是唯一的 (私聊消息建议至少使用time,seq,rand中的两个判断唯一性) */
     seq: event.message_seq,
     /** 引用回复 */
-    source: oicqSource
+    source: oicqSource,
+    toString: () => msgToString(event.message as unknown as AnyMessageSegment[])
   }).catch(error => {
     console.error('[bot] Workspace.process 处理失败', error);
   });
