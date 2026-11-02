@@ -99,8 +99,8 @@ const msgToString = (message: AnyMessageSegment[]) => {
   const pick = (data: Record<string, unknown>, ...keys: string[]) => {
     for (const key of keys) {
       const value = data[key];
-      if (typeof value === 'string' && value.length > 0) return value;
-      if (typeof value === 'number') return String(value);
+      if (typeof value === 'string' && value.length > 0) return value.slice(0, 32);
+      if (typeof value === 'number') return String(value).slice(0, 32);
     }
     return '';
   };
@@ -110,7 +110,7 @@ const msgToString = (message: AnyMessageSegment[]) => {
     const data = msg.data as Record<string, unknown>;
     switch (msg.type) {
       case 'text':
-        return `{text:${pick(data, 'text')}}`;
+        return msg.data.text;
       case 'at':
         return `{at:${pick(data, 'qq', 'uid')}}`;
       case 'face':
@@ -124,9 +124,9 @@ const msgToString = (message: AnyMessageSegment[]) => {
       case 'video':
         return `{video:${pick(data, 'file')}}`;
       case 'json':
-        return `{json:${pick(data, 'data')}}`;
+        return msg.data.data;
       case 'xml':
-        return `{xml:${pick(data, 'data')}}`;
+        return msg.data.data;
       case 'poke':
         return `{poke:${pick(data, 'id', 'type')}}`;
       case 'forward':
