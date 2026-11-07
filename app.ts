@@ -2,14 +2,17 @@ import {
   type AnyMessageSegment,
   type ForwardMessageParams,
   type JsonArray,
-  type JsonObject,
+  type JsonObject, type OutgoingMessage,
   SnowLumaWebSocketClient
 } from '@snowluma/sdk';
-import {Workspace} from '@xopenbot/plugin';
+import {type LikeLogger, Workspace} from '@xopenbot/plugin';
 import YunzaiPlugin from './plugins/yunzai-xbot-plugin/xopenbot.js';
+import SandboxPlugin from './plugins/sandbox-xbot-plugin/index.js';
 import type {Forwardable, Sendable, MessageRet} from "./src/message-part.js";
-import {convertSegment, outgoingToText, toOutgoingMessage} from "./src/message-convert.js";
+import {convertSegment, fromOneBot12Message, outgoingToText, toOutgoingMessage} from "./src/message-convert.js";
+import {convertGroupMessageEvent, convertPrivateMessageEvent} from "./src/event-convert.js";
 import * as fs from "node:fs";
+import type {Message} from "@xopenbot/onebot";
 
 const bot = new SnowLumaWebSocketClient({
   url: 'ws://127.0.0.1:3001',
@@ -163,7 +166,7 @@ bot.onGroupMessage(async event => {
   const source = (event.message as JsonArray).find(item => item!.type === 'reply')
   // @ts-ignore
   const oicqSource = source ? {user_id: source.user_id, seq: source.message_id} : undefined;
-  plugins.process(event.raw_message, {
+  const oicqEvent = {
     /**
      * 快速回复
      * @param content
@@ -237,6 +240,25 @@ bot.onGroupMessage(async event => {
     source: oicqSource,
     seq: event.message_seq,
     toString: () => msgToString(event.message as unknown as AnyMessageSegment[])
+  };
+  plugins.process(event.raw_message, {
+    ...oicqEvent,
+    raw_event: convertGroupMessageEvent(event, gl.get(event.group_id)?.group_name as string | undefined)
+  }).then(result => {
+    const msg: OutgoingMessage = [];
+    result.forEach(item => {
+      item.content?.forEach(it => {
+        if (it.type === 'text') {
+          msg.push({
+            type: 'text',
+            data: {
+              text: it.text
+            }
+          })
+        }
+      })
+    })
+    bot.sendGroupMessage(event.group_id, msg).catch(() => {});
   }).catch(error => {
     console.error('[bot] Workspace.process 处理失败', error);
   });
@@ -247,7 +269,7 @@ bot.onPrivateMessage(event => {
   const source = (event.message as JsonArray).find(item => item!.type === 'reply')
   // @ts-ignore
   const oicqSource = source ? {user_id: source.user_id, seq: source.message_id} : undefined;
-  plugins.process(event.raw_message, {
+  const oicqEvent = {
     /**
      * 快速回复
      * @param content
@@ -314,6 +336,25 @@ bot.onPrivateMessage(event => {
     /** 引用回复 */
     source: oicqSource,
     toString: () => msgToString(event.message as unknown as AnyMessageSegment[])
+  };
+  plugins.process(event.raw_message, {
+    ...oicqEvent,
+    raw_event: convertPrivateMessageEvent(event)
+  }).then(result => {
+    const msg: OutgoingMessage = [];
+    result.forEach(item => {
+      item.content?.forEach(it => {
+        if (it.type === 'text') {
+          msg.push({
+            type: 'text',
+            data: {
+              text: it.text
+            }
+          })
+        }
+      })
+    })
+    bot.sendPrivateMessage(event.user_id, msg).catch(r => {});
   }).catch(error => {
     console.error('[bot] Workspace.process 处理失败', error);
   });
@@ -330,18 +371,136 @@ const gl = new Map(glist.map(item => [item.group_id, item]))
 const gml = new Map<number, Map<number, JsonObject>>();
 
 const plugins = new Workspace({
+  selfInfo: {
+    user_id: String(botInfo.user_id),
+    user_name: botInfo.nickname,
+    user_displayname: botInfo.nickname
+  },
+  deleteMessage(message_id) {
+    return bot.deleteMessage(Number(message_id));
+  },
+  getChannelInfo() {
+    throw new Error('not implemented');
+  },
+  getChannelList() {
+    throw new Error('not implemented');
+  },
+  getChannelMemberInfo() {
+    throw new Error('not implemented');
+  },
+  getChannelMemberList() {
+    throw new Error('not implemented');
+  },
+  getFile() {
+    throw new Error('not implemented');
+  },
+  getFileFragmented() {
+    throw new Error('not implemented');
+  },
+  getFriendList() {
+    throw new Error('not implemented');
+  },
+  // @ts-ignore
+  getGroupInfo(gid) {
+    return bot.getGroupInfo(Number(gid));
+  },
+  // @ts-ignore
+  getGroupList() {
+    return bot.getGroupList();
+  },
+  // @ts-ignore
+  getGroupMemberList(gid) {
+    return bot.getGroupMemberList(Number(gid));
+  },
+  getGuildInfo() {
+    throw new Error('not implemented');
+  },
+  getGuildList() {
+    throw new Error('not implemented');
+  },
+  getGuildMemberInfo() {
+    throw new Error('not implemented');
+  },
+  getGuildMemberList() {
+    throw new Error('not implemented');
+  },
+  getLatestEvents() {
+    throw new Error('not implemented');
+  },
+  getSelfInfo() {
+    return {
+      user_id: String(botInfo.user_id),
+      user_name: botInfo.nickname,
+      user_displayname: botInfo.nickname
+    };
+  },
+  getStatus() {
+    throw new Error('not implemented');
+  },
+  getSupportedActions() {
+    throw new Error('not implemented');
+  },
+  getUserInfo() {
+    throw new Error('not implemented');
+  },
+  getVersion() {
+    throw new Error('not implemented');
+  },
+  leaveChannel() {
+    throw new Error('not implemented');
+  },
+  leaveGroup() {
+    throw new Error('not implemented');
+  },
+  leaveGuild() {
+    throw new Error('not implemented');
+  },
+  async sendMessage(detail_type: string, id: string, message: Message) {
+    const content = fromOneBot12Message(message);
+    if (detail_type === 'private') {
+      const res = await bot.sendPrivateMessage(Number(id), content);
+      return {message_id: String(res.message_id), time: Math.floor(Date.now() / 1000)};
+    }
+    if (detail_type === 'group') {
+      const res = await bot.sendGroupMessage(Number(id), content);
+      return {message_id: String(res.message_id), time: Math.floor(Date.now() / 1000)};
+    }
+    throw new Error('not implemented');
+  },
+  setChannelName() {
+    throw new Error('not implemented');
+  },
+  setGroupName() {
+    throw new Error('not implemented');
+  },
+  setGuildName() {
+    throw new Error('not implemented');
+  },
+  uploadFile() {
+    throw new Error('not implemented');
+  },
+  uploadFileFragmented() {
+    throw new Error('not implemented');
+  },
+  // @ts-ignore
   uin: botInfo.user_id,
+  // @ts-ignore
   fl: fl,
+  // @ts-ignore
   gml: gml,
+  // @ts-ignore
   nickname: botInfo.nickname,
-  logger: (globalThis as unknown as { logger: unknown }).logger,
+  logger: (globalThis as unknown as { logger: LikeLogger }).logger,
+  // @ts-ignore
   makeForwardMsg: async (forwardMsg: Forwardable[]) => {
     return makeForwardMsg(forwardMsg)
   },
+  // @ts-ignore
   getForwardMsg: async (resid: string) => {
     const {messages} = await bot.getForwardMessage({id: resid});
     return messages.map(item => convertSegment(item as unknown as AnyMessageSegment))
   },
+  // @ts-ignore
   pickUser: (uin: number) => {
     return {
       sendMsg: (msg: string) => {
@@ -349,6 +508,7 @@ const plugins = new Workspace({
       }
     }
   },
+  // @ts-ignore
   pickGroup: (gid: number) => {
     if (!gl.has(gid)) {
       return null;
@@ -359,9 +519,10 @@ const plugins = new Workspace({
       }
     }
   },
+  // @ts-ignore
   getGroupMemberInfo: (gid: number, uid: number) => {
     return bot.getGroupMemberInfo(gid, uid)
   }
 });
 
-await plugins.registry(YunzaiPlugin);
+await plugins.registry(YunzaiPlugin, SandboxPlugin);

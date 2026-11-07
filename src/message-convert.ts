@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import type { Readable } from 'node:stream';
 import { normalizeMessage } from '@snowluma/sdk';
 import type { AnyMessageSegment, JsonObject, OutgoingMessage } from '@snowluma/sdk';
+import type { Message as OneBot12Message } from '@xopenbot/onebot';
 import type { MessageElem, Sendable } from './message-part.js';
 
 type FileInput = string | Buffer | Readable;
@@ -200,6 +201,13 @@ export function toOutgoingMessage(content: Sendable): string | AnyMessageSegment
   return segments;
 }
 
+/** 标量统一转成字符串 */
+function toTextValue(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return String(value);
+  return '';
+}
+
 /** 字符串 / 数字统一转成 number，非法时返回 null */
 function toNumber(value: unknown): number | null {
   if (typeof value === 'number') {
@@ -339,6 +347,61 @@ export function convertSegment(segment: AnyMessageSegment): MessageElem | null {
     default:
       return null;
   }
+}
+
+/** 单个 OneBot12 消息段 -> OneBot11 消息段 */
+export function fromOneBot12Segment(segment: {
+  type: string;
+  data: Record<string, unknown>;
+}): AnyMessageSegment {
+  const data = segment.data ?? {};
+  switch (segment.type) {
+    case 'text':
+      return { type: 'text', data: { text: toTextValue(data.text) } };
+    case 'mention':
+      return { type: 'at', data: { qq: toTextValue(data.user_id) } };
+    case 'mention_all':
+      return { type: 'at', data: { qq: 'all' } };
+    case 'image':
+      return { type: 'image', data: { file: toTextValue(data.file_id) } };
+    case 'voice':
+    case 'audio':
+      return { type: 'record', data: { file: toTextValue(data.file_id) } };
+    case 'video':
+      return { type: 'video', data: { file: toTextValue(data.file_id) } };
+    case 'file':
+      return { type: 'file', data: { file: toTextValue(data.file_id) } };
+    case 'location':
+      return {
+        type: 'location',
+        data: {
+          lat: toNumber(data.latitude) ?? 0,
+          lon: toNumber(data.longitude) ?? 0,
+          title: toTextValue(data.title),
+          content: toTextValue(data.content),
+        },
+      };
+    case 'reply':
+      return { type: 'reply', data: { id: toTextValue(data.message_id) } };
+    default: {
+      // 扩展段去掉命名空间前缀（如 qq.face -> face），保留原始数据
+      const index = segment.type.indexOf('.');
+      const type = index === -1 ? segment.type : segment.type.slice(index + 1);
+      return { type, data: { ...data } } as AnyMessageSegment;
+    }
+  }
+}
+
+/** 将 OneBot12 Message（字符串 / 单个消息段 / 消息段数组）转换为 OneBot11 OutgoingMessage */
+export function fromOneBot12Message(message: OneBot12Message): OutgoingMessage {
+  if (typeof message === 'string') {
+    return message;
+  }
+  const list = (Array.isArray(message) ? message : [message]) as {
+    type: string;
+    data: Record<string, unknown>;
+  }[];
+  return list.map(fromOneBot12Segment);
 }
 
 /** 将 OutgoingMessage 转换为 icqq 的 Sendable */

@@ -1,3 +1,6 @@
 [submodule "plugins/yunzai-xbot-plugin"]
 	path = plugins/yunzai-xbot-plugin
 	url = https://github.com/forfindo/yunzai-xbot-plugin.git
+[submodule "plugins/sandbox-xbot-plugin"]
+	path = plugins/sandbox-xbot-plugin
+	url = https://github.com/forfindo/sandbox-xbot-plugin.git

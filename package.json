@@ -14,7 +14,8 @@
   "packageManager": "pnpm@10.30.3",
   "dependencies": {
     "@snowluma/sdk": "2.2.1",
-    "@xopenbot/plugin": "0.0.3"
+    "@xopenbot/onebot": "^0.0.1",
+    "@xopenbot/plugin": "^0.0.5"
   },
   "devDependencies": {
     "@types/node": "^26.6.5"
