@@ -31,8 +31,8 @@ importers:
         specifier: ^0.0.5
         version: 0.0.5
       '@xopenbot/sandbox':
-        specifier: file:D:/IDEAProject/qq-bot/packages/sandbox/xopenbot-sandbox-0.0.5.tgz
-        version: file:../qq-bot/packages/sandbox/xopenbot-sandbox-0.0.5.tgz
+        specifier: ^0.0.6
+        version: 0.0.6
 
   plugins/yunzai-xbot-plugin:
     dependencies:
@@ -348,9 +348,8 @@ packages:
   '@xopenbot/plugin@0.0.5':
     resolution: {integrity: sha512-J2XB96CPqFVmrBzTHzF/F0LBqzX8bRSSmuCjjciu8jE8EhbZWYL79X/QFxKCa3CoisRSMKXTEoeUJljlgZfpxQ==}
 
-  '@xopenbot/sandbox@file:../qq-bot/packages/sandbox/xopenbot-sandbox-0.0.5.tgz':
-    resolution: {integrity: sha512-l40UcXKpHfsNHXPrA+giUYiklXurI5YXF8IvJYb5T4/mkmjln+twOTgHqnld2O3Fqd9m2HDGCiAJhkIUBWHf0w==, tarball: file:../qq-bot/packages/sandbox/xopenbot-sandbox-0.0.5.tgz}
-    version: 0.0.5
+  '@xopenbot/sandbox@0.0.6':
+    resolution: {integrity: sha512-1D9cNyhf1GjPU0YrzPotgOFf53zX6DRWE6mh4WME8VU3E0ekABtsd+ObtTccVvZvgNtqwPEHioX96u2wC9B+RQ==}
 
   abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
@@ -2023,7 +2022,7 @@ snapshots:
       '@xopenbot/onebot': 0.0.1
       node-schedule: 2.1.2
 
-  '@xopenbot/sandbox@file:../qq-bot/packages/sandbox/xopenbot-sandbox-0.0.5.tgz':
+  '@xopenbot/sandbox@0.0.6':
     dependencies:
       '@xopenbot/onebot': 0.0.1
       string.ify: 1.0.64
