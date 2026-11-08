@@ -25,14 +25,14 @@ importers:
   plugins/sandbox-xbot-plugin:
     dependencies:
       '@xopenbot/onebot':
-        specifier: ^0.0.1
+        specifier: 0.0.1
         version: 0.0.1
       '@xopenbot/plugin':
-        specifier: ^0.0.5
+        specifier: 0.0.5
         version: 0.0.5
       '@xopenbot/sandbox':
-        specifier: ^0.0.6
-        version: 0.0.6
+        specifier: 0.0.7
+        version: 0.0.7
 
   plugins/yunzai-xbot-plugin:
     dependencies:
@@ -348,8 +348,8 @@ packages:
   '@xopenbot/plugin@0.0.5':
     resolution: {integrity: sha512-J2XB96CPqFVmrBzTHzF/F0LBqzX8bRSSmuCjjciu8jE8EhbZWYL79X/QFxKCa3CoisRSMKXTEoeUJljlgZfpxQ==}
 
-  '@xopenbot/sandbox@0.0.6':
-    resolution: {integrity: sha512-1D9cNyhf1GjPU0YrzPotgOFf53zX6DRWE6mh4WME8VU3E0ekABtsd+ObtTccVvZvgNtqwPEHioX96u2wC9B+RQ==}
+  '@xopenbot/sandbox@0.0.7':
+    resolution: {integrity: sha512-Qi8SaOSWg2UJl+2IBr3qQ3tp0HK1SfxyVAiSKW8hPyQcZX1NiCbRXtuF2HSkhk6fZpHmUkTXopbgoF5j/WRsug==}
 
   abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
@@ -2022,7 +2022,7 @@ snapshots:
       '@xopenbot/onebot': 0.0.1
       node-schedule: 2.1.2
 
-  '@xopenbot/sandbox@0.0.6':
+  '@xopenbot/sandbox@0.0.7':
     dependencies:
       '@xopenbot/onebot': 0.0.1
       string.ify: 1.0.64
