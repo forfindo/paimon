@@ -107,11 +107,14 @@ importers:
   plugins/yunzai-xbot-plugin/plugins/miao-plugin:
     dependencies:
       cheerio:
-        specifier: ^1.0.0
+        specifier: ^1.2.0
         version: 1.2.0
       image-size:
-        specifier: ^1.1.1
-        version: 1.2.1
+        specifier: ^2.0.4
+        version: 2.0.4
+      moment:
+        specifier: ^2.31.0
+        version: 2.31.0
     devDependencies:
       request:
         specifier: ^2.88.2
@@ -991,11 +994,6 @@ packages:
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
 
-  image-size@1.2.1:
-    resolution: {integrity: sha512-rH+46sQJ2dlwfjfhCyNx5thzrv+dtmBIhPHk0zgRUukHzZ/kRueTJXoYYsclBaKcSMBWuGbOFXtioLpzTb5euw==}
-    engines: {node: '>=16.x'}
-    hasBin: true
-
   image-size@2.0.4:
     resolution: {integrity: sha512-QRUkFFsRV/6fuESxb9Vkq+a0LkSrgKXuc2NEqfikiXxxN/G3tjWt5EVUlMaImRBZRZK/jRBEbYvpPYZL8t08Zw==}
     engines: {node: '>=18'}
@@ -1408,9 +1406,6 @@ packages:
   qs@6.5.5:
     resolution: {integrity: sha512-mzR4sElr1bfCaPJe7m8ilJ6ZXdDaGoObcYR0ZHSsktM/Lt21MVHj5De30GQH2eiZ1qGRTO7LCAzQsUeXTNexWQ==}
     engines: {node: '>=0.6'}
-
-  queue@6.0.2:
-    resolution: {integrity: sha512-iHZWu+q3IdFZFX36ro/lKBkSvfkztY5Y7HMiPlOUjhupPcG2JMfst2KKEpu5XndviX/3UhFbRngUPNKtgvtZiA==}
 
   rc@1.2.8:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
@@ -2707,10 +2702,6 @@ snapshots:
 
   ieee754@1.2.1: {}
 
-  image-size@1.2.1:
-    dependencies:
-      queue: 6.0.2
-
   image-size@2.0.4: {}
 
   imurmurhash@0.1.4:
@@ -3197,10 +3188,6 @@ snapshots:
       - yauzl
 
   qs@6.5.5: {}
-
-  queue@6.0.2:
-    dependencies:
-      inherits: 2.0.4
 
   rc@1.2.8:
     dependencies:
