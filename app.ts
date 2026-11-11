@@ -522,6 +522,10 @@ const plugins = new Workspace({
   // @ts-ignore
   getGroupMemberInfo: (gid: number, uid: number) => {
     return bot.getGroupMemberInfo(gid, uid)
+  },
+  // @ts-ignore
+  getMessage: (message_id: string) => {
+    return bot.getMessage(Number(message_id));
   }
 });
 
