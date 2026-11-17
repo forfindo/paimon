@@ -379,27 +379,6 @@ const plugins = new Workspace({
   deleteMessage(message_id) {
     return bot.deleteMessage(Number(message_id));
   },
-  getChannelInfo() {
-    throw new Error('not implemented');
-  },
-  getChannelList() {
-    throw new Error('not implemented');
-  },
-  getChannelMemberInfo() {
-    throw new Error('not implemented');
-  },
-  getChannelMemberList() {
-    throw new Error('not implemented');
-  },
-  getFile() {
-    throw new Error('not implemented');
-  },
-  getFileFragmented() {
-    throw new Error('not implemented');
-  },
-  getFriendList() {
-    throw new Error('not implemented');
-  },
   // @ts-ignore
   getGroupInfo(gid) {
     return bot.getGroupInfo(Number(gid));
@@ -412,21 +391,6 @@ const plugins = new Workspace({
   getGroupMemberList(gid) {
     return bot.getGroupMemberList(Number(gid));
   },
-  getGuildInfo() {
-    throw new Error('not implemented');
-  },
-  getGuildList() {
-    throw new Error('not implemented');
-  },
-  getGuildMemberInfo() {
-    throw new Error('not implemented');
-  },
-  getGuildMemberList() {
-    throw new Error('not implemented');
-  },
-  getLatestEvents() {
-    throw new Error('not implemented');
-  },
   getSelfInfo() {
     return {
       user_id: String(botInfo.user_id),
@@ -434,73 +398,28 @@ const plugins = new Workspace({
       user_displayname: botInfo.nickname
     };
   },
-  getStatus() {
-    throw new Error('not implemented');
-  },
-  getSupportedActions() {
-    throw new Error('not implemented');
-  },
-  getUserInfo() {
-    throw new Error('not implemented');
-  },
-  getVersion() {
-    throw new Error('not implemented');
-  },
-  leaveChannel() {
-    throw new Error('not implemented');
-  },
-  leaveGroup() {
-    throw new Error('not implemented');
-  },
-  leaveGuild() {
-    throw new Error('not implemented');
-  },
-  async sendMessage(detail_type: string, id: string, message: Message) {
+  async sendGroupMessage(gid: string, message: Message) {
     const content = fromOneBot12Message(message);
-    if (detail_type === 'private') {
-      const res = await bot.sendPrivateMessage(Number(id), content);
-      return {message_id: String(res.message_id), time: Math.floor(Date.now() / 1000)};
-    }
-    if (detail_type === 'group') {
-      const res = await bot.sendGroupMessage(Number(id), content);
-      return {message_id: String(res.message_id), time: Math.floor(Date.now() / 1000)};
-    }
-    throw new Error('not implemented');
+    const res = await bot.sendGroupMessage(Number(gid), content);
+    return {message_id: String(res.message_id), time: Math.floor(Date.now() / 1000)};
   },
-  setChannelName() {
-    throw new Error('not implemented');
+  async sendPrivateMessage(uid: string, message: Message) {
+    const content = fromOneBot12Message(message);
+    const res = await bot.sendPrivateMessage(Number(uid), content);
+    return {message_id: String(res.message_id), time: Math.floor(Date.now() / 1000)};
   },
-  setGroupName() {
-    throw new Error('not implemented');
-  },
-  setGuildName() {
-    throw new Error('not implemented');
-  },
-  uploadFile() {
-    throw new Error('not implemented');
-  },
-  uploadFileFragmented() {
-    throw new Error('not implemented');
-  },
-  // @ts-ignore
   uin: botInfo.user_id,
-  // @ts-ignore
   fl: fl,
-  // @ts-ignore
   gml: gml,
-  // @ts-ignore
   nickname: botInfo.nickname,
   logger: (globalThis as unknown as { logger: LikeLogger }).logger,
-  // @ts-ignore
   makeForwardMsg: async (forwardMsg: Forwardable[]) => {
     return makeForwardMsg(forwardMsg)
   },
-  // @ts-ignore
   getForwardMsg: async (resid: string) => {
     const {messages} = await bot.getForwardMessage({id: resid});
     return messages.map(item => convertSegment(item as unknown as AnyMessageSegment))
   },
-  // @ts-ignore
   pickUser: (uin: number) => {
     return {
       sendMsg: (msg: string) => {
@@ -508,7 +427,6 @@ const plugins = new Workspace({
       }
     }
   },
-  // @ts-ignore
   pickGroup: (gid: number) => {
     if (!gl.has(gid)) {
       return null;
@@ -526,6 +444,9 @@ const plugins = new Workspace({
   // @ts-ignore
   getMessage: (message_id: string) => {
     return bot.getMessage(Number(message_id));
+  },
+  leaveGroup(gid) {
+    return bot.setGroupLeave(Number(gid))
   }
 });
 
