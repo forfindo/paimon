@@ -1,0 +1,14 @@
+pnpm-lock.yaml
+  h_7037025082b470 15-16,18-19,28-29,31-32,34-35,348-349,351-352,354-355,2013,2015,2017,2020,2022
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "68955685bec006e0fe8a27dc2bf13d4e7db6e087",
+  "prompts": {},
+  "humans": {
+    "h_7037025082b470": {
+      "author": "forfindo <3530766280@qq.com>"
+    }
+  }
+}
