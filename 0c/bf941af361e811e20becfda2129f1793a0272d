@@ -1,0 +1,32 @@
+app.ts
+  s_f936b618190199::t_ef88483d2ebdfc 284-285,374-375
+  s_f936b618190199::t_2597b9f579afd6 44-67,70-85,87-89,93-96
+  s_f936b618190199::t_d24cf772308422 471
+  s_f936b618190199::t_953091d032fdd5 68-69
+  s_f936b618190199::t_546e3de34a7f45 326-330
+  s_f936b618190199::t_48380f863e1de5 226-230
+  s_f936b618190199::t_407f7dd2a0c8f8 8,11
+  s_f936b618190199::t_82c81ac9ade11d 391-395
+  s_f936b618190199::t_46c071e74c1f0e 90-92
+  s_f936b618190199::t_bb749ec545d4b3 245
+  s_f936b618190199::t_54a8be30be3e88 441-443,449-451
+  s_f936b618190199::t_52a1f38fdc3ac3 299-303
+  s_f936b618190199::t_d0ab6954f7b117 466
+  s_f936b618190199::t_dae43280074983 482
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "0cbf941af361e811e20becfda2129f1793a0272d",
+  "prompts": {},
+  "sessions": {
+    "s_f936b618190199": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_e039ebc45ffe3fA01FtpNofADf",
+        "model": "deepseek-flash"
+      },
+      "human_author": "forfindo <3530766280@qq.com>"
+    }
+  }
+}
