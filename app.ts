@@ -5,10 +5,10 @@ import {
   type JsonObject, type OutgoingMessage,
   SnowLumaWebSocketClient
 } from '@snowluma/sdk';
-import {type LikeLogger, Workspace} from '@xopenbot/plugin';
+import {type LikeLogger, type Part, type ProcessResult, Workspace} from '@xopenbot/plugin';
 import YunzaiPlugin from './plugins/yunzai-xbot-plugin/xopenbot.js';
 import SandboxPlugin from './plugins/sandbox-xbot-plugin/index.js';
-import type {Forwardable, Sendable, MessageRet} from "./src/message-part.js";
+import type {Forwardable, MessageElem, Sendable, MessageRet} from "./src/message-part.js";
 import {convertSegment, fromOneBot12Message, outgoingToText, toOutgoingMessage} from "./src/message-convert.js";
 import {convertGroupMessageEvent, convertPrivateMessageEvent} from "./src/event-convert.js";
 import * as fs from "node:fs";
@@ -41,14 +41,59 @@ const isSentResult = (content: Sendable): boolean => {
   return typeof obj.message_id === 'string' && obj.type === undefined;
 }
 
-const outgoingWithQuote = (content: Sendable, quoteMsg?: number) => {
+/** 判断待发送消息是否为空（空字符串或空消息段数组） */
+const isEmptyOutgoing = (message: OutgoingMessage): boolean => {
+  if (typeof message === 'string') return message.length === 0;
+  if (Array.isArray(message)) return message.length === 0;
+  return 'length' in message && message.length === 0;
+};
+
+/** 空消息的占位返回值，避免调用方因未发送而拿到 undefined */
+const noopMessageRet = (): MessageRet => ({message_id: '0', seq: 0, rand: 0, time: 0});
+
+/** 插件返回的 Part -> SDK 消息段，空文本 / 非法图片会被丢弃 */
+const partToSegment = (part: Part): AnyMessageSegment | null => {
+  switch (part.type) {
+    case 'text':
+      return part.text ? {type: 'text', data: {text: part.text}} : null;
+    case 'image': {
+      if (!part.content) {
+        return part.path ? {type: 'image', data: {file: part.path}} : null;
+      }
+      const file = /^(?:base64:\/\/|data:|https?:)/i.test(part.content)
+          ? part.content
+          : `base64://${part.content}`;
+      return {type: 'image', data: {file}};
+    }
+    default:
+      return null;
+  }
+}
+
+/** 汇总插件处理结果中的文本和图片，供统一发送 */
+const processResultToMessage = (result: ProcessResult[]): OutgoingMessage => {
+  const segments: AnyMessageSegment[] = [];
+  for (const item of result) {
+    for (const part of item.content ?? []) {
+      const segment = partToSegment(part);
+      if (segment) segments.push(segment);
+    }
+  }
+  return segments;
+}
+
+const outgoingWithQuote = (content: Sendable, quoteMsg?: number): AnyMessageSegment[] => {
   const message = toOutgoingMessage(content);
-  return quoteMsg ? [
-    {type: 'reply' as const, data: {id: String(quoteMsg)}},
-    ...(typeof message === 'string'
-        ? (message ? [{type: 'text' as const, data: {text: message}}] : [])
-        : message),
-  ] : message;
+  const segments = typeof message === 'string'
+      ? (message ? [{type: 'text' as const, data: {text: message}}] : [])
+      : message;
+  if (!segments.length) {
+    return [];
+  }
+  return [
+    ...(quoteMsg ? [{type: 'reply' as const, data: {id: String(quoteMsg)}}] : []),
+    ...segments,
+  ];
 }
 
 const makeForwardMsg = async (forwardMsg: Forwardable[], user_id?: number, group_id?: number) => {
@@ -178,7 +223,11 @@ bot.onGroupMessage(async event => {
         return content as unknown as MessageRet;
       }
       // sendGroupMessage 返回 SendMessageResult，这里补成插件约定的 MessageRet（SDK 只提供 message_id）
-      const res = await bot.sendGroupMessage(event.group_id, outgoingWithQuote(content, quote ? event.message_id : undefined));
+      const message = outgoingWithQuote(content, quote ? event.message_id : undefined);
+      if (isEmptyOutgoing(message)) {
+        return noopMessageRet();
+      }
+      const res = await bot.sendGroupMessage(event.group_id, message);
       return ({message_id: String(res.message_id), seq: 0, rand: 0, time: 0});
     },
     /** 群对象 */
@@ -193,6 +242,7 @@ bot.onGroupMessage(async event => {
       },
       recallMsg,
       sendMsg: (msg: string) => {
+        if (!msg) return Promise.resolve();
         return bot.sendGroupMessage(event.group_id, msg);
       },
       sendFile: (filePath: string) => {
@@ -231,7 +281,8 @@ bot.onGroupMessage(async event => {
     /** 消息时间 */
     time: event.time,
     /** 消息元素数组 */
-    message: (event.message as unknown as AnyMessageSegment[]).map(convertSegment),
+    message: (event.message as unknown as AnyMessageSegment[]).map(convertSegment)
+        .filter((elem): elem is MessageElem => elem !== null),
     /** 字符串形式的消息 */
     raw_message: event.raw_message,
     /** @cqhttp cqhttp方法用 */
@@ -245,20 +296,11 @@ bot.onGroupMessage(async event => {
     ...oicqEvent,
     raw_event: convertGroupMessageEvent(event, gl.get(event.group_id)?.group_name as string | undefined)
   }).then(result => {
-    const msg: OutgoingMessage = [];
-    result.forEach(item => {
-      item.content?.forEach(it => {
-        if (it.type === 'text') {
-          msg.push({
-            type: 'text',
-            data: {
-              text: it.text
-            }
-          })
-        }
-      })
-    })
-    bot.sendGroupMessage(event.group_id, msg).catch(() => {});
+    const msg = processResultToMessage(result);
+    if (isEmptyOutgoing(msg)) return;
+    bot.sendGroupMessage(event.group_id, msg).catch(error => {
+      console.error('[bot] 发送群消息失败', error);
+    });
   }).catch(error => {
     console.error('[bot] Workspace.process 处理失败', error);
   });
@@ -281,7 +323,11 @@ bot.onPrivateMessage(event => {
         return content as unknown as MessageRet;
       }
       // sendGroupMessage 返回 SendMessageResult，这里补成插件约定的 MessageRet（SDK 只提供 message_id）
-      const res = await bot.sendPrivateMessage(event.user_id, outgoingWithQuote(content, quote ? event.message_id : undefined));
+      const message = outgoingWithQuote(content, quote ? event.message_id : undefined);
+      if (isEmptyOutgoing(message)) {
+        return noopMessageRet();
+      }
+      const res = await bot.sendPrivateMessage(event.user_id, message);
       return ({message_id: String(res.message_id), seq: 0, rand: 0, time: 0});
     },
     /** 好友对象 */
@@ -325,7 +371,8 @@ bot.onPrivateMessage(event => {
     /** 消息时间 */
     time: event.time,
     /** 消息元素数组 */
-    message: (event.message as unknown as AnyMessageSegment[]).map(convertSegment),
+    message: (event.message as unknown as AnyMessageSegment[]).map(convertSegment)
+        .filter((elem): elem is MessageElem => elem !== null),
     /** 字符串形式的消息 */
     raw_message: event.raw_message,
     font: event.font,
@@ -341,20 +388,11 @@ bot.onPrivateMessage(event => {
     ...oicqEvent,
     raw_event: convertPrivateMessageEvent(event)
   }).then(result => {
-    const msg: OutgoingMessage = [];
-    result.forEach(item => {
-      item.content?.forEach(it => {
-        if (it.type === 'text') {
-          msg.push({
-            type: 'text',
-            data: {
-              text: it.text
-            }
-          })
-        }
-      })
-    })
-    bot.sendPrivateMessage(event.user_id, msg).catch(r => {});
+    const msg = processResultToMessage(result);
+    if (isEmptyOutgoing(msg)) return;
+    bot.sendPrivateMessage(event.user_id, msg).catch(error => {
+      console.error('[bot] 发送私聊消息失败', error);
+    });
   }).catch(error => {
     console.error('[bot] Workspace.process 处理失败', error);
   });
@@ -400,11 +438,17 @@ const plugins = new Workspace({
   },
   async sendGroupMessage(gid: string, message: Message) {
     const content = fromOneBot12Message(message);
+    if (isEmptyOutgoing(content)) {
+      return {message_id: '0', time: Math.floor(Date.now() / 1000)};
+    }
     const res = await bot.sendGroupMessage(Number(gid), content);
     return {message_id: String(res.message_id), time: Math.floor(Date.now() / 1000)};
   },
   async sendPrivateMessage(uid: string, message: Message) {
     const content = fromOneBot12Message(message);
+    if (isEmptyOutgoing(content)) {
+      return {message_id: '0', time: Math.floor(Date.now() / 1000)};
+    }
     const res = await bot.sendPrivateMessage(Number(uid), content);
     return {message_id: String(res.message_id), time: Math.floor(Date.now() / 1000)};
   },
@@ -419,10 +463,12 @@ const plugins = new Workspace({
   getForwardMsg: async (resid: string) => {
     const {messages} = await bot.getForwardMessage({id: resid});
     return messages.map(item => convertSegment(item as unknown as AnyMessageSegment))
+        .filter((elem): elem is MessageElem => elem !== null);
   },
   pickUser: (uin: number) => {
     return {
       sendMsg: (msg: string) => {
+        if (!msg) return Promise.resolve();
         return bot.sendPrivateMessage(uin, msg)
       }
     }
@@ -433,6 +479,7 @@ const plugins = new Workspace({
     }
     return {
       sendMsg: (msg: string) => {
+        if (!msg) return Promise.resolve();
         return bot.sendGroupMessage(gid, msg)
       }
     }
