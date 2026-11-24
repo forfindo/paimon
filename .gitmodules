@@ -4,3 +4,6 @@
 [submodule "plugins/sandbox-xbot-plugin"]
 	path = plugins/sandbox-xbot-plugin
 	url = https://github.com/forfindo/sandbox-xbot-plugin.git
+[submodule "plugins/pixiv-xbot-plugin"]
+	path = plugins/pixiv-xbot-plugin
+	url = https://github.com/forfindo/pixiv-xbot-plugin.git
