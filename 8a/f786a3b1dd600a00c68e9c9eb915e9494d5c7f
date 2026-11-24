@@ -1,0 +1,14 @@
+plugins/pixiv-xbot-plugin
+  h_7037025082b470 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "8af786a3b1dd600a00c68e9c9eb915e9494d5c7f",
+  "prompts": {},
+  "humans": {
+    "h_7037025082b470": {
+      "author": "forfindo <3530766280@qq.com>"
+    }
+  }
+}
