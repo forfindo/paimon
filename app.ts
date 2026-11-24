@@ -8,6 +8,7 @@ import {
 import {type LikeLogger, type Part, type ProcessResult, Workspace} from '@xopenbot/plugin';
 import YunzaiPlugin from './plugins/yunzai-xbot-plugin/xopenbot.js';
 import SandboxPlugin from './plugins/sandbox-xbot-plugin/index.js';
+import PixivPlugin from './plugins/pixiv-xbot-plugin/index.js';
 import type {Forwardable, MessageElem, Sendable, MessageRet} from "./src/message-part.js";
 import {convertSegment, fromOneBot12Message, outgoingToText, toOutgoingMessage} from "./src/message-convert.js";
 import {convertGroupMessageEvent, convertPrivateMessageEvent} from "./src/event-convert.js";
@@ -497,4 +498,4 @@ const plugins = new Workspace({
   }
 });
 
-await plugins.registry(YunzaiPlugin, SandboxPlugin);
+await plugins.registry(YunzaiPlugin, SandboxPlugin, PixivPlugin);
