@@ -1,0 +1,24 @@
+app.ts
+  h_7037025082b470 17,502-519
+package.json
+  h_7037025082b470 18
+plugins/pixiv-xbot-plugin
+  h_7037025082b470 1
+plugins/sandbox-xbot-plugin
+  h_7037025082b470 1
+plugins/yunzai-xbot-plugin
+  h_7037025082b470 1
+pnpm-lock.yaml
+  h_7037025082b470 18-19,31-32,53-54,56-57,529-530,532-533,1171-1174,1851-1854,2573,2577-2578,2580,2583-2584,2587-2589,3236-3244,3995-3996
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "45c7e90720deb2aedc9528d120dc88a041731a86",
+  "prompts": {},
+  "humans": {
+    "h_7037025082b470": {
+      "author": "forfindo <3530766280@qq.com>"
+    }
+  }
+}
