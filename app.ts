@@ -14,6 +14,7 @@ import {convertSegment, fromOneBot12Message, outgoingToText, toOutgoingMessage} 
 import {convertGroupMessageEvent, convertPrivateMessageEvent} from "./src/event-convert.js";
 import * as fs from "node:fs";
 import type {Message} from "@xopenbot/onebot";
+import { resolve } from "node:path";
 
 const bot = new SnowLumaWebSocketClient({
   url: 'ws://127.0.0.1:3001',
@@ -498,4 +499,21 @@ const plugins = new Workspace({
   }
 });
 
-await plugins.registry(YunzaiPlugin, SandboxPlugin, PixivPlugin);
+await plugins.registry(
+    YunzaiPlugin,
+    {
+      plugin: SandboxPlugin,
+      config: {
+        master: ['3530766280'],
+        botAPI: ["getMessage"]
+      }
+    },
+    {
+      plugin: PixivPlugin,
+      config: {
+        proxy: 'http://127.0.0.1:7890',
+        cookie: '',
+        cacheDir: resolve('data/pixiv'),
+      }
+    }
+);

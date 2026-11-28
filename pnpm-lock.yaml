@@ -15,8 +15,8 @@ importers:
         specifier: 0.0.4
         version: 0.0.4
       '@xopenbot/plugin':
-        specifier: 0.0.7
-        version: 0.0.7
+        specifier: 1.0.0
+        version: 1.0.0
     devDependencies:
       '@types/node':
         specifier: ^26.6.5
@@ -28,8 +28,8 @@ importers:
         specifier: 0.0.4
         version: 0.0.4
       '@xopenbot/plugin':
-        specifier: 0.0.7
-        version: 0.0.7
+        specifier: 1.0.0
+        version: 1.0.0
       https-proxy-agent:
         specifier: 9.1.0
         version: 9.1.0
@@ -50,11 +50,11 @@ importers:
         specifier: 0.0.4
         version: 0.0.4
       '@xopenbot/plugin':
-        specifier: 0.0.7
-        version: 0.0.7
+        specifier: 1.0.0
+        version: 1.0.0
       '@xopenbot/sandbox':
-        specifier: 0.0.9
-        version: 0.0.9
+        specifier: 1.0.0
+        version: 1.0.0
 
   plugins/yunzai-xbot-plugin:
     dependencies:
@@ -526,11 +526,11 @@ packages:
   '@xopenbot/onebot@0.0.4':
     resolution: {integrity: sha512-PcW9hDh5RoodGjmm6N694bVkiS8gyxRiNltYRSSt8vbxs4XjnzxL2ErzKL9G1/H+3vHIP+P1IXX4nRM0cHCDZQ==}
 
-  '@xopenbot/plugin@0.0.7':
-    resolution: {integrity: sha512-kfIlHMojzieaTyGiZ61OPXFBPKIYtiyiN60rMl82b2aeNQKV1FirC5UVgDExLan0AWxXYbH1WTxOipdtSdXpAg==}
+  '@xopenbot/plugin@1.0.0':
+    resolution: {integrity: sha512-9C4RS9T9xYSzmP4thHdv6HdDDtnvX07ekLA83VE+9+9Ueqm6QsD2bzjOLTLFixB1hSTZ8y7N/1b2VgomdraoKw==}
 
-  '@xopenbot/sandbox@0.0.9':
-    resolution: {integrity: sha512-NhrzV0b7GqSnSI7dJOUjzMIVhw6Q1HWuq4J5zGlcwrKPDPUhaR0nBPjiNzfZmtMlo3h60Qf5zG6DzOJzsRqn2Q==}
+  '@xopenbot/sandbox@1.0.0':
+    resolution: {integrity: sha512-lFC8/RejGNxD/wggwqTkQZHlisnJCaqNsfD/hPL/E9lH9cR7U/DtWqHIO1FejCeklyf6ox1jjer6ioxs0fjjag==}
 
   abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
@@ -1167,6 +1167,10 @@ packages:
   http-proxy-agent@4.0.1:
     resolution: {integrity: sha512-k0zdNgqWTGA6aeIRVpvfVob4fL52dTfaehylg0Y4UvSySvOq/Y+BOyPrgpUrA7HylqvU8vIZGsRuXmspskV0Tg==}
     engines: {node: '>= 6'}
+
+  http-proxy-agent@9.1.0:
+    resolution: {integrity: sha512-2NxoveTT58mjYT4n3RPTEfCZGLMbidoO8XEieXfpSYxu+PQJ1qpx4ypwH6N+uF9twBPIvRRgvkvW5HUTYWENig==}
+    engines: {node: '>= 20'}
 
   http-signature@1.2.0:
     resolution: {integrity: sha512-CAbnr6Rz4CYQkLYUtSNXxQPUH2gK8f3iWexVlsnMeD+GjlsQ0Xsy1cOX+mN3dtxYomRy21CiOzU8Uhw6OwncEQ==}
@@ -1843,6 +1847,10 @@ packages:
 
   set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
+
+  shell-quote@1.12.0:
+    resolution: {integrity: sha512-PcByqNyT/38F2kDNi006HAMRJaULuBzq/FOsw3qdZvX/GA9W/jamDaRskgHjubHiftXK5sIFxLNkvrXUwcof6Q==}
+    engines: {node: '>= 0.4'}
 
   signal-exit@3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
@@ -2562,16 +2570,23 @@ snapshots:
 
   '@xopenbot/onebot@0.0.4': {}
 
-  '@xopenbot/plugin@0.0.7':
+  '@xopenbot/plugin@1.0.0':
     dependencies:
       '@xopenbot/onebot': 0.0.4
       node-schedule: 2.1.2
+      shell-quote: 1.12.0
+      yargs-parser: 22.0.0
 
-  '@xopenbot/sandbox@0.0.9':
+  '@xopenbot/sandbox@1.0.0':
     dependencies:
       '@xopenbot/onebot': 0.0.4
+      http-proxy-agent: 9.1.0
+      https-proxy-agent: 9.1.0
       string.ify: 1.0.64
       utf-8-validate: 6.0.6
+    transitivePeerDependencies:
+      - kerberos
+      - supports-color
 
   abbrev@1.1.1:
     optional: true
@@ -3217,6 +3232,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
     optional: true
+
+  http-proxy-agent@9.1.0:
+    dependencies:
+      agent-base: 9.0.0
+      debug: 4.4.3
+      proxy-agent-negotiate: 1.1.0
+    transitivePeerDependencies:
+      - kerberos
+      - supports-color
 
   http-signature@1.2.0:
     dependencies:
@@ -3967,6 +3991,8 @@ snapshots:
 
   set-blocking@2.0.0:
     optional: true
+
+  shell-quote@1.12.0: {}
 
   signal-exit@3.0.7:
     optional: true

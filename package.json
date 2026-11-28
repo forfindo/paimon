@@ -15,7 +15,7 @@
   "dependencies": {
     "@snowluma/sdk": "2.2.1",
     "@xopenbot/onebot": "0.0.4",
-    "@xopenbot/plugin": "0.0.7"
+    "@xopenbot/plugin": "1.0.0"
   },
   "devDependencies": {
     "@types/node": "^26.6.5"
